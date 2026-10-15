@@ -7,8 +7,11 @@ def create_app():
     app = Flask(__name__, static_folder="static", template_folder="templates")
     app.config.from_object(Config)
 
-    # Ensure uploads folder exists
-    os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
+    # Ensure uploads folder exists (safe for serverless read-only filesystems)
+    try:
+        os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
+    except Exception:
+        pass
 
     # Teardown database connection
     app.teardown_appcontext(close_db)
@@ -50,8 +53,11 @@ def create_app():
         return render_template('500.html'), 500
 
     # Auto-initialize DB and ensure Admin exists if not already present
-    with app.app_context():
-        init_db()
+    try:
+        with app.app_context():
+            init_db()
+    except Exception as e:
+        print(f"Startup DB init notice: {e}")
 
     return app
 

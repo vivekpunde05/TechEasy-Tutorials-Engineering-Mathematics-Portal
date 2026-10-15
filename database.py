@@ -18,20 +18,26 @@ def get_db():
             'database': Config.MYSQL_DB,
             'cursorclass': pymysql.cursors.DictCursor,
             'autocommit': False,
-            'charset': 'utf8mb4'
+            'charset': 'utf8mb4',
+            'connect_timeout': 10
         }
         if Config.MYSQL_SSL:
             kwargs['ssl'] = {'ssl': True}
 
         if has_app_context():
-            if 'db' not in g:
+            if 'db' not in g or g.db is None:
                 g.db = pymysql.connect(**kwargs)
+            else:
+                try:
+                    g.db.ping(reconnect=True)
+                except Exception:
+                    g.db = pymysql.connect(**kwargs)
             return g.db
         else:
             return pymysql.connect(**kwargs)
     else:
         if has_app_context():
-            if 'db' not in g:
+            if 'db' not in g or g.db is None:
                 g.db = sqlite3.connect(Config.SQLITE_PATH)
                 g.db.row_factory = sqlite3.Row
                 g.db.execute("PRAGMA foreign_keys = ON;")
@@ -46,7 +52,10 @@ def close_db(e=None):
     """Close the database connection at the end of the request."""
     db = g.pop('db', None)
     if db is not None:
-        db.close()
+        try:
+            db.close()
+        except Exception:
+            pass
 def _format_query(query):
     """Format queries for database dialect compatibility."""
     if Config.DATABASE_TYPE == 'mysql':
