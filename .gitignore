@@ -15,6 +15,7 @@ ENV/
 # Database files
 *.sqlite3
 *.db
+
 *.db-journal
 
 # IDE and Editor files
