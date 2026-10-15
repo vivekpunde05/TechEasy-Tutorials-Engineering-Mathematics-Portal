@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% block title %}Practice: {{ subject.subject_name }} - TechEasy Tutorials{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px;">
+    <!-- Breadcrumb -->
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('student.degree_subjects' if subject.course_type == 'Degree' else 'student.diploma_subjects') }}" style="color:var(--text-muted); font-size:0.9rem;">
+            ← Back to {{ subject.course_type }} Subjects
+        </a>
+    </div>
+
+    <!-- Header & Chapter Selector -->
+    <div class="card" style="margin-bottom: 30px; padding: 28px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
+            <div>
+                <span class="badge badge-{{ 'diploma' if subject.course_type == 'Diploma' else 'degree' }}" style="margin-bottom: 8px;">
+                    {{ subject.course_type }} • {{ subject.semester }}
+                </span>
+                <h1 style="font-size: 2rem; margin-bottom: 6px;">{{ subject.subject_name }}</h1>
+                <p style="color: var(--text-secondary); margin: 0;">Select a chapter below to practice high-yield MCQs.</p>
+            </div>
+
+            <!-- Chapter Select Form -->
+            <form method="GET" action="{{ url_for('student.practice') }}" style="display: flex; gap: 12px; align-items: center; min-width: 320px;">
+                <input type="hidden" name="subject_id" value="{{ subject.id }}">
+                <select name="chapter_id" class="form-control" onchange="this.form.submit()" style="font-weight: 600;">
+                    <option value="">-- Choose Chapter --</option>
+                    {% for ch in chapters %}
+                        <option value="{{ ch.id }}" {% if current_chapter and current_chapter.id == ch.id %}selected{% endif %}>
+                            {{ ch.chapter_name }} ({{ ch.question_count }} MCQs)
+                        </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+    </div>
+
+    {% if current_chapter %}
+        {% if questions %}
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h2 style="font-size: 1.4rem;">
+                    Chapter: <span style="color: var(--primary);">{{ current_chapter.chapter_name }}</span>
+                </h2>
+                <span style="font-weight: 700; color: var(--text-muted); font-size: 0.95rem;">
+                    {{ questions | length }} Questions
+                </span>
+            </div>
+
+            <form method="POST" action="{{ url_for('student.practice') }}">
+                <input type="hidden" name="subject_id" value="{{ subject.id }}">
+                <input type="hidden" name="chapter_id" value="{{ current_chapter.id }}">
+
+                <div style="display: flex; flex-direction: column; gap: 24px; margin-bottom: 40px;">
+                    {% for q in questions %}
+                        <div class="card" style="padding: 28px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                <div style="font-size: 1.05rem; font-weight: 800; color: var(--primary);">
+                                    Q{{ loop.index }}.
+                                </div>
+                                <span class="badge badge-{{ q.difficulty | lower }}">
+                                    {{ q.difficulty }}
+                                </span>
+                            </div>
+
+                            <!-- Question Text -->
+                            <div style="font-size: 1.15rem; font-weight: 500; margin-bottom: 20px; line-height: 1.6;">
+                                {{ q.question | safe }}
+                            </div>
+
+                            {% if q.question_image %}
+                                <div style="margin-bottom: 20px;">
+                                    <img src="/uploads/questions/{{ q.question_image }}" style="max-height: 200px; border-radius: 8px; border: 1px solid var(--border-color);">
+                                </div>
+                            {% endif %}
+
+                            <!-- Options -->
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
+                                {% for opt, text, img in [
+                                    ('A', q.option_a, q.option_a_image),
+                                    ('B', q.option_b, q.option_b_image),
+                                    ('C', q.option_c, q.option_c_image),
+                                    ('D', q.option_d, q.option_d_image)
+                                ] %}
+                                    <label class="cbt-option-item" style="margin: 0; cursor: pointer;">
+                                        <input type="radio" name="answer_{{ q.id }}" value="{{ opt }}" style="display: none;" onchange="this.closest('.card').querySelectorAll('.cbt-option-item').forEach(el => el.classList.remove('selected')); this.closest('.cbt-option-item').classList.add('selected');">
+                                        <div class="cbt-option-letter">{{ opt }}</div>
+                                        <div class="cbt-option-text">
+                                            <div>{{ text | safe }}</div>
+                                            {% if img %}
+                                                <div style="margin-top: 6px;">
+                                                    <img src="/uploads/questions/{{ img }}" style="max-height: 80px; border-radius: 4px;">
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Submit Button Bar -->
+                <div style="position: sticky; bottom: 20px; background: var(--bg-glass); backdrop-filter: blur(10px); padding: 18px 24px; border-radius: var(--radius-xl); border: 1px solid var(--border-color); box-shadow: var(--shadow-xl); display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-weight: 600; color: var(--text-secondary);">
+                        Finished answering? Submit to evaluate your score and view explanations.
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        Submit Practice Test ✓
+                    </button>
+                </div>
+            </form>
+        {% else %}
+            <div class="card" style="text-align: center; padding: 60px 20px;">
+                <h3>No questions in this chapter yet</h3>
+                <p>Questions for {{ current_chapter.chapter_name }} are being prepared. Select another chapter above.</p>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="card" style="text-align: center; padding: 60px 20px;">
+            <div style="font-size: 3rem; margin-bottom: 12px;">📚</div>
+            <h3>Please Select a Chapter to Begin</h3>
+            <p>Choose any chapter from the dropdown above to load the engineering mathematics practice set.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

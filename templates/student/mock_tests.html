@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}{{ course_type }} Mock Tests - TechEasy Tutorials{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px;">
+    <!-- Breadcrumb -->
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('student.index') }}" style="color:var(--text-muted); font-size:0.9rem;">← Back to Home</a>
+    </div>
+
+    <!-- Header -->
+    <div style="margin-bottom: 35px;">
+        <h1 style="font-size: 2.4rem; margin-bottom: 8px;">{{ course_type }} Engineering Mathematics Mock Tests</h1>
+        <p style="color: var(--text-secondary); margin: 0;">Full-length timed examinations simulating authentic exam conditions for {{ course_type }} Engineering subjects.</p>
+    </div>
+
+    {% if tests %}
+        <div class="course-grid">
+            {% for t in tests %}
+                <div class="card">
+                    <div class="card-top">
+                        <div class="card-icon">⏱️</div>
+                        <span class="badge badge-{{ 'diploma' if t.course_type == 'Diploma' else 'degree' }}">
+                            {{ t.course_type }}
+                        </span>
+                    </div>
+
+                    <h3 style="font-size: 1.35rem; margin-bottom: 8px;">{{ t.test_name }}</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                        <strong>Subject:</strong> {{ t.subject_name }}
+                    </p>
+
+                    <div class="card-meta">
+                        <span>📝 {{ t.number_of_questions }} Questions</span>
+                        <span>⌛ {{ t.time_limit }} Minutes</span>
+                    </div>
+
+                    {% if t.attempt_id %}
+                        <!-- ALREADY ATTEMPTED -->
+                        <div style="background: var(--bg-surface); padding: 14px; border-radius: var(--radius-md); margin-bottom: 16px; text-align: center; border: 1px solid var(--border-color);">
+                            <div style="font-size: 0.82rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Your Attempt Score</div>
+                            <div style="font-size: 1.3rem; font-weight: 800; color: var(--primary); margin: 2px 0;">
+                                {{ t.attempt_score }} / {{ t.number_of_questions }} ({{ t.attempt_percentage }}%)
+                            </div>
+                        </div>
+                        <a href="{{ url_for('student.mock_test_results') }}" class="btn btn-secondary btn-block">
+                            View Result Record
+                        </a>
+                    {% else %}
+                        <!-- NOT YET ATTEMPTED -->
+                        <a href="{{ url_for('student.take_test', test_id=t.id) }}" class="btn btn-primary btn-block">
+                            Start Mock Test →
+                        </a>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card" style="text-align: center; padding: 60px 20px;">
+            <div style="font-size: 3rem; margin-bottom: 12px;">⏱️</div>
+            <h3>No Mock Tests Available</h3>
+            <p>There are currently no {{ course_type }} mock tests available. Check back soon!</p>
+        </div>
+    {% endif %}
+
+    <div style="text-align: center; margin-top: 40px;">
+        <a href="{{ url_for('student.mock_test_results') }}" class="btn btn-outline">
+            📋 View My All Mock Test Submissions
+        </a>
+    </div>
+</div>
+{% endblock %}

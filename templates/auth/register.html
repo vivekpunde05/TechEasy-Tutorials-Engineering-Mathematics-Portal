@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}Create Student Account - TechEasy Tutorials{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-card">
+        <div style="text-align: center; margin-bottom: 24px;">
+            <div class="brand-icon" style="margin: 0 auto 12px; width:48px; height:48px; font-size:1.4rem;">∑</div>
+            <h2>Create Student Account</h2>
+            <p style="color: var(--text-secondary); font-size: 0.95rem;">Join thousands of students mastering Engineering Mathematics.</p>
+        </div>
+
+        {% if error %}
+            <div class="alert alert-danger" style="margin-bottom: 20px;">
+                <span>{{ error }}</span>
+            </div>
+        {% endif %}
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" class="form-control" placeholder="e.g. Vivek Sharma" required autofocus>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="student@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="mobile">Mobile Number (10 digits)</label>
+                <input type="tel" id="mobile" name="mobile" class="form-control" placeholder="9876543210" pattern="[0-9]{10}" maxlength="10" required>
+            </div>
+
+            <!-- STREAM SELECTION: DIPLOMA OR DEGREE -->
+            <div class="form-group">
+                <label style="font-weight: 700; margin-bottom: 8px; display: block;">Select Your Course Stream *</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <label class="cbt-option-item" style="cursor: pointer; padding: 14px; margin: 0; display: flex; align-items: center; gap: 10px;">
+                        <input type="radio" name="course_type" value="Diploma" required style="accent-color: var(--primary);">
+                        <div>
+                            <strong style="display:block; font-size:1rem;">Diploma</strong>
+                            <span style="font-size:0.8rem; color:var(--text-muted);">Polytechnic (M1 & M2)</span>
+                        </div>
+                    </label>
+                    <label class="cbt-option-item" style="cursor: pointer; padding: 14px; margin: 0; display: flex; align-items: center; gap: 10px;">
+                        <input type="radio" name="course_type" value="Degree" checked required style="accent-color: var(--primary);">
+                        <div>
+                            <strong style="display:block; font-size:1rem;">Degree</strong>
+                            <span style="font-size:0.8rem; color:var(--text-muted);">B.E. / B.Tech (M1 - M4)</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password (min 6 characters)</label>
+                <div class="password-wrapper">
+                    <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" minlength="6" required>
+                    <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('password', this)" title="Show password" aria-label="Show password">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <div class="password-wrapper">
+                    <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="••••••••" minlength="6" required>
+                    <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('confirm_password', this)" title="Show password" aria-label="Show password">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 10px;">
+                Create Free Account
+            </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 24px; font-size: 0.95rem; color: var(--text-secondary);">
+            Already have an account? 
+            <a href="{{ url_for('auth.student_login') }}" style="font-weight: 700;">Log in</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

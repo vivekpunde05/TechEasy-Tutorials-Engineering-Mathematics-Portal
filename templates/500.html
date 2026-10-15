@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Server Error - TechEasy Tutorials{% endblock %}
+{% block content %}
+<div class="container" style="text-align: center; padding: 100px 20px;">
+    <div style="font-size: 5rem; font-weight: 800; font-family: 'Outfit'; color: var(--danger);">500</div>
+    <h1 style="margin-bottom: 16px;">Internal Server Error</h1>
+    <p style="color: var(--text-secondary); max-width: 500px; margin: 0 auto 30px;">
+        An unexpected error occurred while solving this equation. Please try again shortly.
+    </p>
+    <a href="{{ url_for('student.index') }}" class="btn btn-primary btn-lg">Return to Home</a>
+</div>
+{% endblock %}

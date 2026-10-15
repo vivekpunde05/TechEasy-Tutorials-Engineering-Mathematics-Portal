@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}Manage {{ selected_stream }} Video Lectures - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px; padding-bottom: 60px;">
+    <!-- Breadcrumb -->
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('admin.dashboard', tab=selected_stream.lower()) }}" style="color:var(--text-muted); font-size:0.9rem;">
+            ← Back to {{ selected_stream }} Dashboard
+        </a>
+    </div>
+
+    <div class="section-header" style="text-align: left; margin-bottom: 30px;">
+        <h1 style="font-size: 2.2rem; margin-bottom: 6px;">Manage {{ selected_stream }} Video Lectures</h1>
+        <p>Curate YouTube tutorials and mathematical lecture videos for {{ selected_stream }} students.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 360px 1fr; gap: 30px; align-items: start;">
+        <!-- ADD VIDEO LECTURE FORM -->
+        <div class="card" style="padding: 28px; border-top: 4px solid var(--{{ 'primary' if selected_stream == 'Degree' else 'secondary' }});">
+            <h3 style="font-size: 1.25rem; margin-bottom: 16px;">+ Add {{ selected_stream }} Video Lecture</h3>
+            <form method="POST" action="{{ url_for('admin.video_lectures', stream=selected_stream) }}">
+                <input type="hidden" name="action" value="add">
+                <input type="hidden" name="course_type" value="{{ selected_stream }}">
+                <input type="hidden" name="stream" value="{{ selected_stream }}">
+
+                <div class="form-group">
+                    <label for="youtube_link">YouTube Video URL</label>
+                    <input type="url" name="youtube_link" id="youtube_link" class="form-control" placeholder="https://www.youtube.com/watch?v=..." required>
+                    <small style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px; display: block;">
+                        Supports standard, youtu.be, and shorts links.
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Lecture Topic / Description</label>
+                    <textarea name="description" id="description" class="form-control" rows="3" placeholder="e.g. {{ 'Eigenvalues & Eigenvectors - Linear Algebra' if selected_stream == 'Degree' else 'Derivatives & Standard Formulae - Polytechnic' }}" required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">
+                    Add Video Lecture
+                </button>
+            </form>
+        </div>
+
+        <!-- VIDEO LECTURES TABLE -->
+        <div>
+            {% if lectures %}
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Thumbnail</th>
+                                <th>Topic Description</th>
+                                <th>YouTube Link</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for v in lectures %}
+                                <tr>
+                                    <td style="width: 120px;">
+                                        {% if v.youtube_id %}
+                                            <img src="https://img.youtube.com/vi/{{ v.youtube_id }}/mqdefault.jpg" style="width: 100px; aspect-ratio: 16/9; object-fit: cover; border-radius: 6px; cursor: pointer;" onclick="openVideoModal('{{ v.youtube_id }}', '{{ v.description | escape }}')" title="Click to play">
+                                        {% else %}
+                                            <span style="color: var(--text-muted); font-size: 0.8rem;">No Preview</span>
+                                        {% endif %}
+                                    </td>
+                                    <td><strong>{{ v.description }}</strong></td>
+                                    <td>
+                                        <a href="{{ v.youtube_link }}" target="_blank" style="font-size: 0.85rem; word-break: break-all;">
+                                            Watch on YouTube ↗
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <div style="display: flex; gap: 8px;">
+                                            <button type="button" class="btn btn-secondary btn-sm" onclick="openVideoModal('{{ v.youtube_id }}', '{{ v.description | escape }}')">
+                                                Preview
+                                            </button>
+                                            <form method="POST" action="{{ url_for('admin.video_lectures', stream=selected_stream) }}" onsubmit="return confirm('Delete this video lecture?');" style="display:inline;">
+                                                <input type="hidden" name="action" value="delete">
+                                                <input type="hidden" name="video_id" value="{{ v.id }}">
+                                                <input type="hidden" name="stream" value="{{ selected_stream }}">
+                                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="card" style="text-align: center; padding: 40px;">
+                    <p style="margin: 0; color: var(--text-muted);">No video lectures added yet for {{ selected_stream }}.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

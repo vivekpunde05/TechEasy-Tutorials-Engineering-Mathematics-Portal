@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}{{ selected_stream }} Practice Evaluation Scores - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px; padding-bottom: 60px;">
+    <!-- Breadcrumb -->
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('admin.dashboard', tab=selected_stream.lower()) }}" style="color:var(--text-muted); font-size:0.9rem;">
+            ← Back to {{ selected_stream }} Dashboard
+        </a>
+    </div>
+
+    <div class="section-header" style="text-align: left; margin-bottom: 30px;">
+        <h1 style="font-size: 2.2rem; margin-bottom: 6px;">{{ selected_stream }} Practice Evaluation Scores</h1>
+        <p>Chapter self-evaluation scores and performance accuracy of {{ selected_stream }} students.</p>
+    </div>
+
+    {% if results %}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Subject</th>
+                        <th>Chapter</th>
+                        <th>Total Qs</th>
+                        <th>Score (Correct / Wrong)</th>
+                        <th>Accuracy</th>
+                        <th>Date & Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in results %}
+                        <tr>
+                            <td>
+                                <strong>{{ r.student_name }}</strong>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">{{ r.student_email }}</div>
+                            </td>
+                            <td>{{ r.subject_name }}</td>
+                            <td>{{ r.chapter_name or 'All Chapters' }}</td>
+                            <td>{{ r.total_questions }}</td>
+                            <td>
+                                <strong style="color: var(--primary);">{{ r.score }}</strong>
+                                <span style="font-size: 0.82rem; color: var(--text-muted);">({{ r.correct_answers }}C / {{ r.wrong_answers }}W)</span>
+                            </td>
+                            <td>
+                                <span class="badge" style="background: {{ '#dcfce7' if r.percentage >= 50 else '#fee2e2' }}; color: {{ '#15803d' if r.percentage >= 50 else '#b91c1c' }};">
+                                    {{ "%.1f" | format(r.percentage) }}%
+                                </span>
+                            </td>
+                            <td style="color: var(--text-muted); font-size: 0.88rem;">{{ r.test_date }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="card" style="text-align: center; padding: 60px 20px;">
+            <h3>No {{ selected_stream }} Evaluations Yet</h3>
+            <p style="color: var(--text-muted);">No {{ selected_stream }} students have submitted chapter practice sets yet.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

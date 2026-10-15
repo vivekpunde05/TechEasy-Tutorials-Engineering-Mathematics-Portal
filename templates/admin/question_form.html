@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Add New MCQ' if mode == 'add' else 'Edit MCQ' }} - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px;">
+    <!-- Breadcrumb -->
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('admin.questions', stream=selected_stream) }}" style="color:var(--text-muted); font-size:0.9rem;">← Back to {{ selected_stream }} Questions Bank</a>
+    </div>
+
+    <div class="section-header" style="text-align: left; margin-bottom: 25px;">
+        <h1 style="font-size: 2.2rem; margin-bottom: 6px;">{{ ('Add New ' ~ selected_stream ~ ' MCQ Question') if mode == 'add' else ('Edit ' ~ selected_stream ~ ' MCQ Question #' ~ mcq.id) }}</h1>
+        <p>Supports full LaTeX mathematics notation (use <code>$ formula $</code> for inline math, <code>$$ formula $$</code> for display math).</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 380px; gap: 30px; align-items: start;">
+        <!-- MAIN FORM -->
+        <div class="card" style="padding: 32px; border-top: 4px solid var(--{{ 'primary' if selected_stream == 'Degree' else 'secondary' }});">
+            <form method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="stream" value="{{ selected_stream }}">
+
+                <!-- Subject & Chapter Selection -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label for="subject_select">{{ selected_stream }} Subject *</label>
+                        <select name="subject_id" id="subject_select" class="form-control" required>
+                            <option value="">-- Select {{ selected_stream }} Subject --</option>
+                            {% for s in subjects %}
+                                <option value="{{ s.id }}" {% if mcq and mcq.subject_id == s.id %}selected{% endif %}>
+                                    {{ s.subject_name }} ({{ s.semester if 'Semester' in s.semester else 'Semester ' ~ s.semester }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="chapter_select">Chapter *</label>
+                        <select name="chapter_id" id="chapter_select" class="form-control" required>
+                            <option value="">-- First Select Subject --</option>
+                            {% if chapters %}
+                                {% for c in chapters %}
+                                    <option value="{{ c.id }}" {% if mcq and mcq.chapter_id == c.id %}selected{% endif %}>
+                                        {{ c.chapter_name }}
+                                    </option>
+                                {% endfor %}
+                            {% endif %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Math Symbols Helper Toolbar -->
+                <div style="margin-bottom: 12px;">
+                    <label style="font-size:0.85rem; font-weight:700; color:var(--text-secondary); margin-bottom:6px; display:block;">
+                        Quick Insert Mathematical Formula Symbols:
+                    </label>
+                    <div id="mathToolbar" style="display: flex; gap: 6px; flex-wrap: wrap; background: var(--bg-surface); padding: 8px 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                        <button type="button" class="btn btn-secondary btn-sm math-sym-btn" data-snippet="$\int f(x)\,dx$">$\int$</button>
+                        <button type="button" class="btn btn-secondary btn-sm math-sym-btn" data-snippet="$\int_a^b f(x)\,dx$">$\int_a^b$</button>
+                        <button type="button" class="btn btn-secondary btn-sm math-sym-btn" data-snippet="$\frac{d}{dx}$">$\frac{d}{dx}$</button>
+                        <button type="button" class="btn btn-secondary btn-sm math-sym-btn" data-snippet="$\frac{\partial u}{\partial x}$">$\frac{\partial}{\partial x}$</button>
+                        <button type="button" class="btn btn-secondary btn-sm math-sym-btn" data-snippet="$\frac{a}{b}$">$\frac{a}{b}$</button>
+                        <button type="button" class="btn btn-secondary btn-sm math-sym-btn" data-snippet="$\sqrt{x}$">$\sqrt{x}$</button>
+                        <button type="button" class="btn btn-secondary btn-sm math-sym-btn" data-snippet="$\lambda$">$\lambda$</button>
+                        <button type="button" class="btn btn-secondary btn-sm math-sym-btn" data-snippet="$\theta$">$\theta$</button>
+                        <button type="button" class="btn btn-secondary btn-sm math-sym-btn" data-snippet="$\sum_{n=1}^\infty$">$\sum$</button>
+                        <button type="button" class="btn btn-secondary btn-sm math-sym-btn" data-snippet="$\begin{bmatrix} a & b \\ c & d \end{bmatrix}$">Matrix</button>
+                    </div>
+                </div>
+
+                <!-- Question Text -->
+                <div class="form-group">
+                    <label for="question">Question Statement *</label>
+                    <textarea name="question" id="question" class="form-control" rows="3" placeholder="Enter problem statement with LaTeX math notation e.g. What is the value of $\int_0^1 x^2 dx$?" required>{{ mcq.question if mcq else '' }}</textarea>
+                </div>
+
+                <!-- Question Image (optional) -->
+                <div class="form-group">
+                    <label for="question_image">Question Diagram / Image (Optional)</label>
+                    <input type="file" name="question_image" id="question_image" class="form-control" accept="image/*">
+                    {% if mcq and mcq.question_image %}
+                        <div style="margin-top: 8px;">
+                            <span style="font-size:0.8rem; color:var(--text-muted);">Current image:</span>
+                            <img src="/uploads/questions/{{ mcq.question_image }}" style="max-height: 80px; border-radius: 4px; margin-top: 4px;">
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Options A, B, C, D -->
+                <div style="margin: 24px 0 16px;">
+                    <h3 style="font-size: 1.15rem; margin-bottom: 16px;">Answer Options (A, B, C, D)</h3>
+
+                    <!-- Option A -->
+                    <div style="background: var(--bg-surface); padding: 16px; border-radius: var(--radius-md); margin-bottom: 12px; border: 1px solid var(--border-color);">
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <span style="font-weight: 800; color: var(--primary);">Option (A)</span>
+                            <input type="text" name="option_a" id="option_a" class="form-control" value="{{ mcq.option_a if mcq else '' }}" placeholder="Answer text or LaTeX e.g. $\frac{1}{3}$" required>
+                        </div>
+                        <div style="margin-top: 8px; font-size: 0.85rem;">
+                            <input type="file" name="option_a_image" accept="image/*">
+                        </div>
+                    </div>
+
+                    <!-- Option B -->
+                    <div style="background: var(--bg-surface); padding: 16px; border-radius: var(--radius-md); margin-bottom: 12px; border: 1px solid var(--border-color);">
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <span style="font-weight: 800; color: var(--primary);">Option (B)</span>
+                            <input type="text" name="option_b" id="option_b" class="form-control" value="{{ mcq.option_b if mcq else '' }}" placeholder="Answer text or LaTeX e.g. $1$" required>
+                        </div>
+                        <div style="margin-top: 8px; font-size: 0.85rem;">
+                            <input type="file" name="option_b_image" accept="image/*">
+                        </div>
+                    </div>
+
+                    <!-- Option C -->
+                    <div style="background: var(--bg-surface); padding: 16px; border-radius: var(--radius-md); margin-bottom: 12px; border: 1px solid var(--border-color);">
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <span style="font-weight: 800; color: var(--primary);">Option (C)</span>
+                            <input type="text" name="option_c" id="option_c" class="form-control" value="{{ mcq.option_c if mcq else '' }}" placeholder="Answer text or LaTeX e.g. $\frac{1}{2}$" required>
+                        </div>
+                        <div style="margin-top: 8px; font-size: 0.85rem;">
+                            <input type="file" name="option_c_image" accept="image/*">
+                        </div>
+                    </div>
+
+                    <!-- Option D -->
+                    <div style="background: var(--bg-surface); padding: 16px; border-radius: var(--radius-md); margin-bottom: 12px; border: 1px solid var(--border-color);">
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <span style="font-weight: 800; color: var(--primary);">Option (D)</span>
+                            <input type="text" name="option_d" id="option_d" class="form-control" value="{{ mcq.option_d if mcq else '' }}" placeholder="Answer text or LaTeX e.g. $0$" required>
+                        </div>
+                        <div style="margin-top: 8px; font-size: 0.85rem;">
+                            <input type="file" name="option_d_image" accept="image/*">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Correct Answer Selection & Difficulty -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label for="correct_answer">Correct Answer Key *</label>
+                        <select name="correct_answer" id="correct_answer" class="form-control" required style="font-weight: 700;">
+                            <option value="">-- Choose Key --</option>
+                            <option value="A" {% if mcq and mcq.correct_answer == 'A' %}selected{% endif %}>(A)</option>
+                            <option value="B" {% if mcq and mcq.correct_answer == 'B' %}selected{% endif %}>(B)</option>
+                            <option value="C" {% if mcq and mcq.correct_answer == 'C' %}selected{% endif %}>(C)</option>
+                            <option value="D" {% if mcq and mcq.correct_answer == 'D' %}selected{% endif %}>(D)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="difficulty">Difficulty Level</label>
+                        <select name="difficulty" id="difficulty" class="form-control">
+                            <option value="Easy" {% if mcq and mcq.difficulty == 'Easy' %}selected{% endif %}>Easy</option>
+                            <option value="Medium" {% if not mcq or mcq.difficulty == 'Medium' %}selected{% endif %}>Medium</option>
+                            <option value="Hard" {% if mcq and mcq.difficulty == 'Hard' %}selected{% endif %}>Hard</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Step-by-Step Explanation -->
+                <div class="form-group">
+                    <label for="explanation">Step-by-Step Solution & Explanation</label>
+                    <textarea name="explanation" id="explanation" class="form-control" rows="3" placeholder="Provide mathematical derivation, property used, or solution steps...">{{ mcq.explanation if mcq else '' }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="explanation_image">Solution Diagram / Image (Optional)</label>
+                    <input type="file" name="explanation_image" id="explanation_image" class="form-control" accept="image/*">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg btn-block" style="margin-top: 10px;">
+                    {{ 'Save MCQ to Question Bank' if mode == 'add' else 'Update MCQ Question' }}
+                </button>
+            </form>
+        </div>
+
+        <!-- LIVE PREVIEW SIDEBAR -->
+        <div style="position: sticky; top: 90px;">
+            <div class="card" style="padding: 24px; border: 2px dashed var(--border-color);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <div style="font-weight: 800; font-size: 1.1rem; color: var(--primary);">
+                        ✨ Live MathJax Preview
+                    </div>
+                    <span class="badge" style="background:var(--primary-light); color:var(--primary);">Real-Time</span>
+                </div>
+                <div id="liveMathPreview" style="min-height: 200px; color: var(--text-primary); line-height: 1.6;">
+                    <em style="color: var(--text-muted);">Formulas and equation previews will appear here as you type...</em>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

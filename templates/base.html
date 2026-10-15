@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TechEasy Tutorials - Master Engineering Mathematics{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Design System CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- MathJax 3 for Native Engineering Mathematics Formula Rendering -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+            }
+        };
+    </script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- ==================== NAVIGATION BAR ==================== -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <a href="{{ url_for('student.index') }}" class="brand-logo">
+                <div class="brand-icon">∑</div>
+                <div>TechEasy <span>Tutorials</span></div>
+            </a>
+
+            <nav>
+                <ul class="nav-menu" id="navMenu">
+                    {% if session.get('student_id') %}
+                        <!-- LOGGED IN STUDENT: SHOW ONLY THEIR STREAM -->
+                        <li><a href="{{ url_for('student.index') }}" class="nav-link">Home</a></li>
+                        {% if session.get('student_course_type') == 'Diploma' %}
+                            <li><a href="{{ url_for('student.diploma_subjects') }}" class="nav-link">Diploma Subjects</a></li>
+                            <li><a href="{{ url_for('student.mock_tests') }}" class="nav-link">Diploma Mock Tests</a></li>
+                            <li><a href="{{ url_for('student.video_lectures') }}" class="nav-link">Diploma Video Lectures</a></li>
+                        {% else %}
+                            <li><a href="{{ url_for('student.degree_subjects') }}" class="nav-link">Degree Subjects</a></li>
+                            <li><a href="{{ url_for('student.mock_tests') }}" class="nav-link">Degree Mock Tests</a></li>
+                            <li><a href="{{ url_for('student.video_lectures') }}" class="nav-link">Degree Video Lectures</a></li>
+                        {% endif %}
+                        <li><a href="{{ url_for('student.mock_test_results') }}" class="nav-link">My Test Results</a></li>
+                    
+                    {% elif session.get('admin_id') %}
+                        <!-- LOGGED IN ADMIN: 4 HEADER OPTIONS -->
+                        <li><a href="{{ url_for('admin.dashboard', tab='home') }}" class="nav-link {{ 'active' if active_tab == 'home' else '' }}">Home</a></li>
+                        <li><a href="{{ url_for('admin.dashboard', tab='degree') }}" class="nav-link {{ 'active' if active_tab == 'degree' else '' }}">Degree</a></li>
+                        <li><a href="{{ url_for('admin.dashboard', tab='diploma') }}" class="nav-link {{ 'active' if active_tab == 'diploma' else '' }}">Diploma</a></li>
+                        <li><a href="{{ url_for('admin.dashboard', tab='students') }}" class="nav-link {{ 'active' if active_tab == 'students' else '' }}">Students</a></li>
+                    
+                    {% else %}
+                        <!-- NOT LOGGED IN: ONLY LOGIN AND ENTRY OPTIONS -->
+                        <li><a href="{{ url_for('student.index') }}" class="nav-link">Home</a></li>
+                        <li><a href="{{ url_for('auth.student_login') }}" class="nav-link">Student Login</a></li>
+                        <li><a href="{{ url_for('auth.student_register') }}" class="nav-link">Register Account</a></li>
+                        <li><a href="{{ url_for('auth.admin_login') }}" class="nav-link">Admin Portal</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+
+            <div class="nav-actions">
+                <!-- Dark / Light Mode Switcher -->
+                <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Dark/Light Mode">
+                    🌙
+                </button>
+
+                {% if session.get('student_id') %}
+                    <div class="user-badge">
+                        <div class="user-avatar">{{ session.get('student_name', 'S')[0] | upper }}</div>
+                        <div>
+                            <span style="font-size:0.85rem; font-weight:700;">{{ session.get('student_name', 'Student') }}</span>
+                            <span class="badge badge-{{ 'diploma' if session.get('student_course_type') == 'Diploma' else 'degree' }}" style="font-size:0.65rem; padding:2px 6px; margin-left:4px;">
+                                {{ session.get('student_course_type', 'Degree') }}
+                            </span>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('auth.student_logout') }}" class="btn btn-secondary btn-sm">Logout</a>
+                {% elif session.get('admin_id') %}
+                    <div class="user-badge" style="border-color:var(--primary);">
+                        <div class="user-avatar" style="background:var(--accent);">A</div>
+                        <span>{{ session.get('admin_name', 'Admin') }} (Super Admin)</span>
+                    </div>
+                    <a href="{{ url_for('auth.admin_logout') }}" class="btn btn-secondary btn-sm">Admin Logout</a>
+                {% else %}
+                    <a href="{{ url_for('auth.student_login') }}" class="btn btn-secondary btn-sm">Login</a>
+                    <a href="{{ url_for('auth.student_register') }}" class="btn btn-primary btn-sm">Register</a>
+                {% endif %}
+
+                <!-- Mobile Menu Hamburger -->
+                <button type="button" class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== FLASH ALERTS ==================== -->
+    <div class="alerts-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'error' else 'danger' }}">
+                        <span>{{ message }}</span>
+                        <button type="button" class="alert-close" onclick="this.parentElement.remove();">×</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- ==================== MAIN PAGE CONTENT ==================== -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ==================== GLOBAL VIDEO MODAL ==================== -->
+    <div class="modal-overlay" id="videoPlayerModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="videoModalTitle" style="font-size:1.15rem;">Video Lecture</h3>
+                <button type="button" class="modal-close" id="videoModalClose">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="video-embed-wrapper">
+                    <iframe id="videoPlayerIframe" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 TechEasy Tutorials. Dedicated to Engineering Mathematics Excellence.</p>
+        </div>
+    </footer>
+
+    <!-- Core Main JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

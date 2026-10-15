@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% block title %}Manage Test Questions - {{ test.test_name }} - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px;">
+    <!-- Breadcrumb -->
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('admin.tests', stream=test.course_type) }}" style="color:var(--text-muted); font-size:0.9rem;">← Back to {{ test.course_type }} Tests List</a>
+    </div>
+
+    <!-- Test Meta Card -->
+    <div class="card" style="padding: 24px 28px; margin-bottom: 30px; border-left: 5px solid var(--primary);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <span class="badge badge-{{ 'diploma' if test.course_type == 'Diploma' else 'degree' }}" style="margin-bottom: 6px;">
+                    {{ test.course_type }}
+                </span>
+                <h1 style="font-size: 2rem; margin-bottom: 4px;">{{ test.test_name }}</h1>
+                <div style="color: var(--text-secondary); font-size: 0.95rem;">
+                    <strong>Subject:</strong> {{ test.subject_name }} • 
+                    <strong>Time Limit:</strong> {{ test.time_limit }} Minutes
+                </div>
+            </div>
+
+            <div style="text-align: right;">
+                <div style="font-size: 2.2rem; font-weight: 800; font-family: 'Outfit'; color: var(--primary);">
+                    {{ assigned_questions | length }}
+                </div>
+                <div style="font-size: 0.82rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+                    Questions Allocated
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 1: ASSIGNED QUESTIONS -->
+    <div style="margin-bottom: 45px;">
+        <h2 style="font-size: 1.4rem; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+            <span>Current Test Questions</span>
+            <span class="badge" style="background:var(--primary-light); color:var(--primary);">{{ assigned_questions | length }}</span>
+        </h2>
+
+        {% if assigned_questions %}
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                {% for q in assigned_questions %}
+                    <div class="card" style="padding: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 14px;">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                    <span style="font-weight: 800; color: var(--primary);">Q{{ loop.index }}.</span>
+                                    <span style="font-size: 0.85rem; color: var(--text-muted);">{{ q.chapter_name }}</span>
+                                    <span class="badge badge-{{ q.difficulty | lower }}">{{ q.difficulty }}</span>
+                                </div>
+                                <div style="font-size: 1.05rem; font-weight: 500; margin-bottom: 10px;">
+                                    {{ q.question | safe }}
+                                </div>
+                                <div style="font-size: 0.88rem; color: var(--text-secondary);">
+                                    <strong>Correct Answer:</strong> ({{ q.correct_answer }})
+                                </div>
+                            </div>
+
+                            <form method="POST" style="margin: 0;">
+                                <input type="hidden" name="action" value="remove_question">
+                                <input type="hidden" name="question_id" value="{{ q.id }}">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    Remove from Test
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card" style="text-align: center; padding: 40px;">
+                <p style="margin: 0; color: var(--text-muted);">No questions allocated to this test yet. Add questions from the pool below.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- SECTION 2: AVAILABLE QUESTIONS FOR THIS SUBJECT -->
+    <div>
+        <h2 style="font-size: 1.4rem; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+            <span>Available Questions Bank for {{ test.subject_name }}</span>
+            <span class="badge" style="background:var(--bg-surface); color:var(--text-secondary); border:1px solid var(--border-color);">
+                {{ available_questions | length }} Available
+            </span>
+        </h2>
+
+        {% if available_questions %}
+            <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 50px;">
+                {% for q in available_questions %}
+                    <div class="card" style="padding: 20px; background: var(--bg-surface);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 14px;">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                    <span style="font-weight: 800; color: var(--text-muted);">ID #{{ q.id }}</span>
+                                    <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">{{ q.chapter_name }}</span>
+                                    <span class="badge badge-{{ q.difficulty | lower }}">{{ q.difficulty }}</span>
+                                </div>
+                                <div style="font-size: 1.05rem; font-weight: 500; margin-bottom: 10px;">
+                                    {{ q.question | safe }}
+                                </div>
+                                <div style="font-size: 0.88rem; color: var(--text-secondary);">
+                                    <strong>Key:</strong> ({{ q.correct_answer }})
+                                </div>
+                            </div>
+
+                            <form method="POST" style="margin: 0;">
+                                <input type="hidden" name="action" value="add_question">
+                                <input type="hidden" name="question_id" value="{{ q.id }}">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    + Add to Test
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card" style="text-align: center; padding: 40px;">
+                <p style="margin: 0; color: var(--text-muted);">
+                    All available questions for this subject are already added to this test, or no questions exist in the bank. 
+                    <a href="{{ url_for('admin.add_question') }}">Add more MCQs here</a>.
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

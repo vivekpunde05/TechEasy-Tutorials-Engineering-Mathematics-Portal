@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}My Practice History - TechEasy Tutorials{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px;">
+    <!-- Breadcrumb -->
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('student.index') }}" style="color:var(--text-muted); font-size:0.9rem;">← Back to Home</a>
+    </div>
+
+    <div class="section-header" style="text-align: left; margin-bottom: 30px;">
+        <h1 style="font-size: 2.2rem; margin-bottom: 6px;">Chapter Practice Records</h1>
+        <p>A history of all chapter-level MCQ practice sessions you have evaluated.</p>
+    </div>
+
+    {% if results %}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Chapter</th>
+                        <th>Questions</th>
+                        <th>Score</th>
+                        <th>Accuracy</th>
+                        <th>Date & Time</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in results %}
+                        <tr>
+                            <td><strong>{{ r.subject_name }}</strong></td>
+                            <td>{{ r.chapter_name or 'All Chapters' }}</td>
+                            <td>{{ r.total_questions }}</td>
+                            <td>
+                                <span style="font-weight: 800; color: var(--primary);">{{ r.score }}</span> / {{ r.total_questions }}
+                                <span style="font-size: 0.8rem; color: var(--text-muted); margin-left: 6px;">
+                                    ({{ r.correct_answers }}C / {{ r.wrong_answers }}W)
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge" style="background: {{ '#dcfce7' if r.percentage >= 50 else '#fee2e2' }}; color: {{ '#15803d' if r.percentage >= 50 else '#b91c1c' }};">
+                                    {{ "%.1f" | format(r.percentage) }}%
+                                </span>
+                            </td>
+                            <td style="color: var(--text-muted); font-size: 0.9rem;">{{ r.test_date }}</td>
+                            <td>
+                                <a href="{{ url_for('student.practice', subject_id=r.subject_id, chapter_id=r.chapter_id) }}" class="btn btn-secondary btn-sm">
+                                    Practice Again
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="card" style="text-align: center; padding: 60px 20px;">
+            <div style="font-size: 3rem; margin-bottom: 12px;">📝</div>
+            <h3>No Practice Records Found</h3>
+            <p style="margin-bottom: 24px;">You haven't practiced any chapters yet. Start practicing to track your accuracy.</p>
+            <a href="{{ url_for('student.degree_subjects') }}" class="btn btn-primary btn-lg">
+                Explore Subjects & Practice →
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

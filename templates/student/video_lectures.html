@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}{{ course_type }} Video Lectures - TechEasy Tutorials{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px;">
+    <!-- Breadcrumb -->
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('student.index') }}" style="color:var(--text-muted); font-size:0.9rem;">← Back to Home</a>
+    </div>
+
+    <!-- Header & Search Controls -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px; margin-bottom: 35px;">
+        <div>
+            <h1 style="font-size: 2.4rem; margin-bottom: 6px;">{{ course_type }} Mathematics Video Lectures</h1>
+            <p style="color: var(--text-secondary); margin: 0;">Curated YouTube tutorials and solved examples exclusively for {{ course_type }} engineering maths.</p>
+        </div>
+
+        <!-- Search Form -->
+        <form method="GET" action="{{ url_for('student.video_lectures') }}" style="display: flex; gap: 8px; align-items: center;">
+            <input type="text" name="search" value="{{ search }}" placeholder="Search {{ course_type }} lecture topics..." class="form-control" style="width: 250px; padding: 8px 12px; font-size: 0.9rem;">
+            {% if course_type %}
+                <input type="hidden" name="course_type" value="{{ course_type }}">
+            {% endif %}
+            <button type="submit" class="btn btn-secondary btn-sm">Search</button>
+            {% if search %}
+                <a href="{{ url_for('student.video_lectures', course_type=course_type) }}" class="btn btn-outline btn-sm">Clear</a>
+            {% endif %}
+        </form>
+    </div>
+
+    {% if lectures %}
+        <div class="video-grid">
+            {% for v in lectures %}
+                <div class="video-card" onclick="openVideoModal('{{ v.youtube_id }}', '{{ v.description | escape }}')">
+                    <div class="video-thumb-wrapper">
+                        {% if v.youtube_id %}
+                            <img src="https://img.youtube.com/vi/{{ v.youtube_id }}/mqdefault.jpg" alt="{{ v.description }}" class="video-thumb" loading="lazy">
+                        {% else %}
+                            <div style="width: 100%; height: 100%; background: #1e293b; display: flex; align-items: center; justify-content: center; color: white;">
+                                No Thumbnail
+                            </div>
+                        {% endif %}
+                        <div class="play-overlay">
+                            <div class="play-icon-circle">▶</div>
+                        </div>
+                    </div>
+                    <div class="video-card-body">
+                        <span class="badge badge-{{ 'diploma' if v.course_type == 'Diploma' else 'degree' }}" style="margin-bottom: 8px;">
+                            {{ v.course_type }}
+                        </span>
+                        <h4>{{ v.description }}</h4>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card" style="text-align: center; padding: 60px 20px;">
+            <div style="font-size: 3rem; margin-bottom: 12px;">🎬</div>
+            <h3>No Video Lectures Found</h3>
+            <p>No video lectures matched your search filter. Try clearing the search query.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

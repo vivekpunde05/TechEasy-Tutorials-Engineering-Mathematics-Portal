@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}My {{ course_type }} Mock Test Results - TechEasy Tutorials{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px;">
+    <!-- Breadcrumb -->
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('student.mock_tests') }}" style="color:var(--text-muted); font-size:0.9rem;">← Back to {{ course_type }} Mock Tests</a>
+    </div>
+
+    <div class="section-header" style="text-align: left; margin-bottom: 30px;">
+        <h1 style="font-size: 2.2rem; margin-bottom: 6px;">My {{ course_type }} Mock Test Results</h1>
+        <p>Review your completed {{ course_type }} Engineering Mathematics mock test scores and performance timeline.</p>
+    </div>
+
+    {% if attempts %}
+        <div style="display: flex; flex-direction: column; gap: 18px; margin-bottom: 50px;">
+            {% for a in attempts %}
+                <div class="card" style="padding: 24px 28px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                                <span class="badge badge-{{ 'diploma' if a.course_type == 'Diploma' else 'degree' }}">
+                                    {{ a.course_type }}
+                                </span>
+                                <span style="font-size: 0.85rem; color: var(--text-muted);">
+                                    Submitted on {{ a.submitted_at }}
+                                </span>
+                            </div>
+                            <h3 style="font-size: 1.35rem; margin-bottom: 6px;">{{ a.test_name }}</h3>
+                            <div style="color: var(--text-secondary); font-size: 0.95rem;">
+                                <strong>Subject:</strong> {{ a.subject_name }}
+                            </div>
+                        </div>
+
+                        <!-- Score Gauge & Badges -->
+                        <div style="display: flex; align-items: center; gap: 24px; text-align: right;">
+                            <div>
+                                <div style="font-size: 1.8rem; font-weight: 800; font-family: 'Outfit'; color: var(--primary);">
+                                    {{ a.score }} / {{ a.total_questions }}
+                                </div>
+                                <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+                                    Total Score
+                                </div>
+                            </div>
+
+                            <div style="padding: 8px 16px; border-radius: var(--radius-md); background: {{ 'var(--success-light)' if a.percentage >= 50 else 'var(--danger-light)' }}; text-align: center;">
+                                <div style="font-size: 1.5rem; font-weight: 800; color: {{ 'var(--success)' if a.percentage >= 50 else 'var(--danger)' }};">
+                                    {{ "%.1f" | format(a.percentage) }}%
+                                </div>
+                                <div style="font-size: 0.75rem; font-weight: 700; color: {{ 'var(--success)' if a.percentage >= 50 else 'var(--danger)' }}; text-transform: uppercase;">
+                                    {{ 'PASSED' if a.percentage >= 50 else 'NEEDS WORK' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card" style="text-align: center; padding: 60px 20px;">
+            <div style="font-size: 3rem; margin-bottom: 12px;">📊</div>
+            <h3>No {{ course_type }} Mock Test Attempts Found</h3>
+            <p style="margin-bottom: 24px;">You have not attempted any {{ course_type }} mock tests yet. Take a test now to benchmark your performance.</p>
+            <a href="{{ url_for('student.mock_tests') }}" class="btn btn-primary btn-lg">
+                Browse Available {{ course_type }} Mock Tests →
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

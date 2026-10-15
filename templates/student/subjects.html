@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}{{ course_type }} Engineering Mathematics - TechEasy Tutorials{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px;">
+    <!-- Breadcrumb -->
+    <div style="margin-bottom: 24px;">
+        <a href="{{ url_for('student.index') }}" style="color:var(--text-muted); font-size:0.9rem;">← Back to Home</a>
+    </div>
+
+    <div class="section-header" style="text-align: left; margin-bottom: 35px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <span class="badge badge-{{ 'diploma' if course_type == 'Diploma' else 'degree' }}" style="font-size: 0.9rem; padding: 6px 16px;">
+                {{ course_type }} Stream
+            </span>
+        </div>
+        <h1 style="font-size: 2.4rem;">{{ course_type }} Engineering Mathematics</h1>
+        <p>Select your subject to begin practicing chapter-wise MCQs or taking mock examinations.</p>
+    </div>
+
+    {% if subjects %}
+        <div class="course-grid">
+            {% for s in subjects %}
+                <div class="card">
+                    <div class="card-top">
+                        <div class="card-icon">{{ '📐' if course_type == 'Diploma' else '∫' }}</div>
+                        <span class="badge" style="background:var(--bg-surface); color:var(--text-secondary); border:1px solid var(--border-color);">
+                            {{ s.semester }}
+                        </span>
+                    </div>
+
+                    <h3>{{ s.subject_name }}</h3>
+                    <p>
+                        Comprehensive question bank covering all syllabus modules, formulae, and analytical problems.
+                    </p>
+
+                    <div class="card-meta">
+                        <span>📖 {{ s.chapter_count }} Chapters</span>
+                        <span>📝 {{ s.question_count }} MCQs</span>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: auto;">
+                        <a href="{{ url_for('student.practice', subject_id=s.id) }}" class="btn btn-primary btn-block">
+                            Start Practice →
+                        </a>
+                        <a href="{{ url_for('student.mock_tests', course_type=s.course_type) }}" class="btn btn-secondary" title="View Mock Tests">
+                            ⏱️
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card" style="text-align: center; padding: 60px 20px;">
+            <h3>No subjects found</h3>
+            <p>Subjects for this course stream will be added soon.</p>
+            <a href="{{ url_for('student.index') }}" class="btn btn-primary">Return to Home</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

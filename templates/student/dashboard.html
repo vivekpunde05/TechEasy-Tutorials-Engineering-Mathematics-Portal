@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% block title %}Student Dashboard - Basic Information - TechEasy Tutorials{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 35px; padding-bottom: 60px; max-width: 960px;">
+
+    <!-- ==================== STUDENT WELCOME & PROFILE HEADER ==================== -->
+    <div class="card" style="padding: 36px 32px; margin-bottom: 30px; border-left: 6px solid var(--primary); background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-surface) 100%);">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--primary-gradient); display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 800; color: #fff; box-shadow: var(--shadow-glow);">
+                    {{ (student.name[0] if student and student.name else session.get('student_name', 'S')[0]) | upper }}
+                </div>
+                <div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                        <span class="badge badge-{{ 'diploma' if stream == 'Diploma' else 'degree' }}" style="font-size: 0.85rem; padding: 5px 14px;">
+                            {{ stream }} Engineering Stream
+                        </span>
+                        <span class="badge badge-easy" style="font-size: 0.85rem; padding: 5px 14px;">
+                            ✓ Active Student
+                        </span>
+                    </div>
+                    <h1 style="font-size: 2.1rem; margin-bottom: 4px;">
+                        Welcome, <span class="gradient-text">{{ student.name if student else session.get('student_name', 'Student') }}</span>
+                    </h1>
+                    <p style="color: var(--text-secondary); margin: 0; font-size: 1rem;">
+                        Student Portal & Academic Account Profile
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== BASIC STUDENT INFORMATION CARD ==================== -->
+    <div class="card" style="padding: 36px 32px; margin-bottom: 30px;">
+        <div class="card-top" style="border-bottom: 1px solid var(--border-color); padding-bottom: 18px; margin-bottom: 26px;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <div class="card-icon" style="font-size: 1.8rem; display: flex; align-items: center; justify-content: center; background: var(--primary-light); color: var(--primary); width: 48px; height: 48px; border-radius: 12px;">
+                    👤
+                </div>
+                <div>
+                    <h2 style="font-size: 1.5rem; margin-bottom: 4px;">Basic Student Information</h2>
+                    <p style="color: var(--text-secondary); margin: 0; font-size: 0.95rem;">Registered student credentials and academic enrollment profile.</p>
+                </div>
+            </div>
+            <span style="font-size: 0.88rem; color: var(--text-muted); font-weight: 600;">
+                ID: #{{ student.id if student else session.get('student_id', '-') }}
+            </span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
+            
+            <!-- Full Name -->
+            <div style="background: var(--bg-surface); padding: 18px 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">
+                    👤 Full Name
+                </div>
+                <div style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary);">
+                    {{ student.name if student else session.get('student_name', 'Student') }}
+                </div>
+            </div>
+
+            <!-- Course Stream -->
+            <div style="background: var(--bg-surface); padding: 18px 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">
+                    🎓 Course Stream
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary);">
+                        {{ stream }} Engineering
+                    </span>
+                    <span class="badge badge-{{ 'diploma' if stream == 'Diploma' else 'degree' }}" style="font-size: 0.75rem;">
+                        {{ stream }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Email Address -->
+            <div style="background: var(--bg-surface); padding: 18px 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">
+                    📧 Email Address
+                </div>
+                <div style="font-size: 1.05rem; font-weight: 600; color: var(--text-primary); word-break: break-all;">
+                    {{ student.email if student else session.get('student_email', 'N/A') }}
+                </div>
+            </div>
+
+            <!-- Mobile Number -->
+            <div style="background: var(--bg-surface); padding: 18px 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">
+                    📱 Mobile Number
+                </div>
+                <div style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary);">
+                    {{ student.mobile if student and student.mobile else 'N/A' }}
+                </div>
+            </div>
+
+            <!-- Student ID -->
+            <div style="background: var(--bg-surface); padding: 18px 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">
+                    🆔 Student Account ID
+                </div>
+                <div style="font-size: 1.15rem; font-weight: 700; color: var(--primary);">
+                    #{{ student.id if student else session.get('student_id', '-') }}
+                </div>
+            </div>
+
+            <!-- Registration Date -->
+            <div style="background: var(--bg-surface); padding: 18px 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">
+                    📅 Enrollment Date
+                </div>
+                <div style="font-size: 1.05rem; font-weight: 600; color: var(--text-primary);">
+                    {{ student.created_at if student and student.created_at else 'Active Enrolled' }}
+                </div>
+            </div>
+
+            <!-- Account Status -->
+            <div style="background: var(--bg-surface); padding: 18px 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">
+                    🛡️ Account Status
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #10b981;"></span>
+                    <span style="font-size: 1.05rem; font-weight: 700; color: #10b981;">
+                        Active Verified Student
+                    </span>
+                </div>
+            </div>
+
+            <!-- Role Type -->
+            <div style="background: var(--bg-surface); padding: 18px 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">
+                    👥 Access Level
+                </div>
+                <div style="font-size: 1.05rem; font-weight: 600; color: var(--text-primary); text-transform: capitalize;">
+                    {{ student.role if student and student.role else 'student' }} (Self-Study Access)
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

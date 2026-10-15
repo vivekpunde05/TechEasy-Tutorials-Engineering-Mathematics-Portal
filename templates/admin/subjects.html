@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block title %}Manage {{ selected_stream }} Subjects - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px; padding-bottom: 60px;">
+    <!-- Breadcrumb -->
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('admin.dashboard', tab=selected_stream.lower()) }}" style="color:var(--text-muted); font-size:0.9rem;">
+            ← Back to {{ selected_stream }} Dashboard
+        </a>
+    </div>
+
+    <div style="margin-bottom: 30px;">
+        <h1 style="font-size: 2.2rem; margin-bottom: 6px;">
+            {{ '🎓 Degree Engineering' if selected_stream == 'Degree' else '📜 Diploma Polytechnic' }} Subjects
+        </h1>
+        <p style="color: var(--text-secondary); margin: 0;">
+            Manage {{ selected_stream }} curriculum subjects, syllabus chapters, and question banks.
+        </p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 380px 1fr; gap: 30px; align-items: start;">
+        <!-- ADD SUBJECT FORM (NO COURSE STREAM DROPDOWN) -->
+        <div class="card" style="padding: 28px; border-top: 4px solid var(--{{ 'primary' if selected_stream == 'Degree' else 'secondary' }});">
+            <div style="margin-bottom: 18px;">
+                <h3 style="font-size: 1.25rem; margin-bottom: 4px;">+ Add New {{ selected_stream }} Subject</h3>
+                <span class="badge badge-{{ 'degree' if selected_stream == 'Degree' else 'diploma' }}" style="font-size: 0.75rem;">
+                    Enrolled Stream: {{ selected_stream }}
+                </span>
+            </div>
+
+            <form method="POST" action="{{ url_for('admin.subjects', stream=selected_stream) }}">
+                <input type="hidden" name="action" value="add">
+                <input type="hidden" name="course_type" value="{{ selected_stream }}">
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="semester" style="display:block; font-weight:600; margin-bottom:6px;">Semester</label>
+                    <input type="text" name="semester" id="semester" class="form-control" placeholder="e.g. Semester 1" required>
+                    <small style="color:var(--text-muted); font-size:0.8rem;">Enter semester (e.g. Semester 1, Semester 2)</small>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label for="subject_name" style="display:block; font-weight:600; margin-bottom:6px;">Subject Name</label>
+                    <input type="text" name="subject_name" id="subject_name" class="form-control" placeholder="{{ 'e.g. Engineering Mathematics - I' if selected_stream == 'Degree' else 'e.g. Basic Mathematics (Diploma M1)' }}" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">
+                    + Add {{ selected_stream }} Subject
+                </button>
+            </form>
+        </div>
+
+        <!-- SUBJECTS TABLE (STREAM-ISOLATED) -->
+        <div>
+            {% if subjects %}
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Semester</th>
+                                <th>Subject Name</th>
+                                <th>Chapters</th>
+                                <th>MCQs</th>
+                                <th>Manage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in subjects %}
+                                <tr>
+                                    <td style="color: var(--text-muted);">{{ loop.index }}</td>
+                                    <td>{{ s.semester if 'Semester' in s.semester else 'Semester ' ~ s.semester }}</td>
+                                    <td><strong>{{ s.subject_name }}</strong></td>
+                                    <td>
+                                        <a href="{{ url_for('admin.chapters', stream=selected_stream, subject_id=s.id) }}" class="btn btn-secondary btn-sm" style="padding: 4px 10px; font-size: 0.8rem;">
+                                            {{ s.chapter_count }} Chapters →
+                                        </a>
+                                    </td>
+                                    <td><strong>{{ s.question_count }}</strong> MCQs</td>
+                                    <td>
+                                        <form method="POST" onsubmit="return confirm('Delete this subject and all its chapters/questions?');" style="display:inline;">
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="subject_id" value="{{ s.id }}">
+                                            <input type="hidden" name="course_type" value="{{ selected_stream }}">
+                                            <button type="submit" class="btn btn-danger btn-sm" style="padding:4px 10px;">✕ Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="card" style="text-align: center; padding: 60px 20px;">
+                    <h3>No {{ selected_stream }} Subjects Added Yet</h3>
+                    <p style="color: var(--text-muted);">Use the form on the left to add your first {{ selected_stream }} subject.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

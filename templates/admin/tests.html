@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}Manage {{ selected_stream }} Mock Tests - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px; padding-bottom: 60px;">
+    <!-- Breadcrumb -->
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('admin.dashboard', tab=selected_stream.lower()) }}" style="color:var(--text-muted); font-size:0.9rem;">
+            ← Back to {{ selected_stream }} Dashboard
+        </a>
+    </div>
+
+    <div class="section-header" style="text-align: left; margin-bottom: 30px;">
+        <h1 style="font-size: 2.2rem; margin-bottom: 6px;">Manage {{ selected_stream }} Mock Tests</h1>
+        <p>Create timed online examination papers and configure question allocations for {{ selected_stream }} subjects.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 360px 1fr; gap: 30px; align-items: start;">
+        <!-- CREATE TEST FORM -->
+        <div class="card" style="padding: 28px; border-top: 4px solid var(--{{ 'primary' if selected_stream == 'Degree' else 'secondary' }});">
+            <h3 style="font-size: 1.25rem; margin-bottom: 16px;">+ Create New {{ selected_stream }} Mock Test</h3>
+            <form method="POST" action="{{ url_for('admin.tests', stream=selected_stream) }}">
+                <input type="hidden" name="action" value="add">
+                <input type="hidden" name="course_type" value="{{ selected_stream }}">
+                <input type="hidden" name="stream" value="{{ selected_stream }}">
+
+                <div class="form-group">
+                    <label for="test_name">Mock Test Title</label>
+                    <input type="text" name="test_name" id="test_name" class="form-control" placeholder="e.g. {{ 'Engineering Maths - I Final Mock' if selected_stream == 'Degree' else 'Basic Mathematics Final Mock' }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="subject_id">{{ selected_stream }} Subject</label>
+                    <select name="subject_id" id="subject_id" class="form-control" required>
+                        <option value="">-- Select {{ selected_stream }} Subject --</option>
+                        {% for s in subjects %}
+                            <option value="{{ s.id }}">{{ s.subject_name }} ({{ s.semester if 'Semester' in s.semester else 'Semester ' ~ s.semester }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="time_limit">Time Limit (Minutes)</label>
+                    <input type="number" name="time_limit" id="time_limit" class="form-control" value="30" min="5" max="180" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">
+                    Create Test
+                </button>
+            </form>
+        </div>
+
+        <!-- TESTS TABLE -->
+        <div>
+            {% if tests %}
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Test Name</th>
+                                <th>Subject</th>
+                                <th>Time</th>
+                                <th>Questions</th>
+                                <th>Submissions</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for t in tests %}
+                                <tr>
+                                    <td>
+                                        <div style="font-weight: 700;">{{ t.test_name }}</div>
+                                    </td>
+                                    <td>{{ t.subject_name }}</td>
+                                    <td>{{ t.time_limit }} mins</td>
+                                    <td>
+                                        <a href="{{ url_for('admin.manage_test', test_id=t.id) }}" style="font-weight: 700;">
+                                            {{ t.number_of_questions }} Questions →
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('admin.test_results', test_id=t.id) }}">
+                                            {{ t.attempt_count }} Attempts
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <div style="display: flex; gap: 6px;">
+                                            <a href="{{ url_for('admin.manage_test', test_id=t.id) }}" class="btn btn-secondary btn-sm">Build</a>
+                                            <a href="{{ url_for('admin.test_results', test_id=t.id) }}" class="btn btn-outline btn-sm">Scores</a>
+                                            <form method="POST" action="{{ url_for('admin.tests', stream=selected_stream) }}" onsubmit="return confirm('Delete this test paper?');" style="display:inline;">
+                                                <input type="hidden" name="action" value="delete">
+                                                <input type="hidden" name="test_id" value="{{ t.id }}">
+                                                <input type="hidden" name="stream" value="{{ selected_stream }}">
+                                                <button type="submit" class="btn btn-danger btn-sm">✕</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="card" style="text-align: center; padding: 40px;">
+                    <p style="margin: 0; color: var(--text-muted);">No mock tests created yet for {{ selected_stream }}. Use the form on the left to create your first test.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Topics for {{ chapter.chapter_name }} - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px;">
+    <!-- Breadcrumb -->
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('admin.chapters', subject_id=chapter.subject_id) }}" style="color:var(--text-muted); font-size:0.9rem;">
+            ← Back to Chapters for {{ chapter.subject_name }}
+        </a>
+    </div>
+
+    <div class="section-header" style="text-align: left; margin-bottom: 30px;">
+        <span class="badge badge-{{ 'diploma' if chapter.course_type == 'Diploma' else 'degree' }}" style="margin-bottom: 8px;">
+            {{ chapter.course_type }} • {{ chapter.subject_name }}
+        </span>
+        <h1 style="font-size: 2.2rem; margin-bottom: 6px;">Chapter Topics: {{ chapter.chapter_name }}</h1>
+        <p>Define curriculum topics for student learning and question tagging.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 360px 1fr; gap: 30px; align-items: start;">
+        <!-- ADD TOPIC FORM -->
+        <div class="card" style="padding: 28px;">
+            <h3 style="font-size: 1.25rem; margin-bottom: 16px;">+ Add Sub-Topic</h3>
+            <form method="POST">
+                <input type="hidden" name="action" value="add">
+                <input type="hidden" name="chapter_id" value="{{ chapter.id }}">
+
+                <div class="form-group">
+                    <label for="topic_name">Topic Name</label>
+                    <input type="text" name="topic_name" id="topic_name" class="form-control" placeholder="e.g. Cayley-Hamilton Theorem" required autofocus>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">
+                    Add Topic
+                </button>
+            </form>
+        </div>
+
+        <!-- TOPICS LIST -->
+        <div>
+            {% if topics %}
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Topic Name</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for t in topics %}
+                                <tr>
+                                    <td style="color: var(--text-muted);">{{ loop.index }}</td>
+                                    <td><strong>{{ t.topic_name }}</strong></td>
+                                    <td>
+                                        <form method="POST" onsubmit="return confirm('Delete this topic?');" style="display:inline;">
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="chapter_id" value="{{ chapter.id }}">
+                                            <input type="hidden" name="topic_id" value="{{ t.id }}">
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="card" style="text-align: center; padding: 40px;">
+                    <p style="margin: 0; color: var(--text-muted);">No sub-topics created for this chapter yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

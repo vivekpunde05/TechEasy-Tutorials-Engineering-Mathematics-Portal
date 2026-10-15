@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}TechEasy Tutorials - Engineering Mathematics Portal{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 40px 15px 60px; max-width: 860px;">
+
+    <!-- ==================== HOME SECTION ==================== -->
+    <section class="home-section">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div class="brand-icon" style="margin: 0 auto 12px; width: 52px; height: 52px; font-size: 1.6rem;">∑</div>
+            <h1 style="font-size: 2.1rem; margin-bottom: 6px;">TechEasy Tutorials</h1>
+            <p style="color: var(--text-secondary); margin: 0; font-size: 0.95rem;">Engineering Mathematics Portal</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; align-items: stretch;">
+
+            <!-- ==================== STUDENT LOGIN ==================== -->
+            <div class="card" style="padding: 30px 24px; border-top: 4px solid var(--primary); display: flex; flex-direction: column;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                    <div style="width: 42px; height: 42px; border-radius: 10px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                        🎓
+                    </div>
+                    <div>
+                        <h2 style="font-size: 1.35rem; margin: 0;">Student Login</h2>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">Diploma & Degree</span>
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ url_for('auth.student_login') }}">
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label for="student_email" style="font-size: 0.85rem;">Email Address</label>
+                        <input type="email" name="email" id="student_email" class="form-control" placeholder="student@example.com" required autofocus>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <label for="student_password" style="font-size: 0.85rem; margin: 0;">Password</label>
+                            <a href="{{ url_for('auth.student_forgot_password') }}" style="font-size: 0.8rem; font-weight: 600;">Forgot?</a>
+                        </div>
+                        <div class="password-wrapper">
+                            <input type="password" name="password" id="student_password" class="form-control" placeholder="••••••••" required>
+                            <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('student_password', this)" title="Show password" aria-label="Show password">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block btn-lg">
+                        Log In as Student
+                    </button>
+                </form>
+
+                <div style="margin-top: auto; padding-top: 22px; border-top: 1px solid var(--border-color); text-align: center; font-size: 0.92rem; color: var(--text-secondary);">
+                    New student? 
+                    <a href="{{ url_for('auth.student_register') }}" style="font-weight: 700; color: var(--primary);">Register here →</a>
+                </div>
+            </div>
+
+            <!-- ==================== ADMIN LOGIN ==================== -->
+            <div class="card" style="padding: 30px 24px; border-top: 4px solid var(--accent); display: flex; flex-direction: column;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                    <div style="width: 42px; height: 42px; border-radius: 10px; background: rgba(245, 158, 11, 0.14); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                        🛡️
+                    </div>
+                    <div>
+                        <h2 style="font-size: 1.35rem; margin: 0;">Admin Login</h2>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">Faculty & Management</span>
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ url_for('auth.admin_login') }}">
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label for="admin_email" style="font-size: 0.85rem;">Email Address</label>
+                        <input type="email" name="email" id="admin_email" class="form-control" placeholder="admin@example.com" required>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label for="admin_password" style="font-size: 0.85rem; margin-bottom: 6px;">Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" name="password" id="admin_password" class="form-control" placeholder="••••••••" required>
+                            <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('admin_password', this)" title="Show password" aria-label="Show password">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-block btn-lg" style="background: var(--accent); color: #ffffff; border: none; font-weight: 700;">
+                        Log In as Admin
+                    </button>
+                </form>
+
+                <div style="margin-top: auto; padding-top: 22px; border-top: 1px solid var(--border-color); text-align: center; font-size: 0.85rem; color: var(--text-muted);">
+                    Authorized administrative access only.
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+</div>
+{% endblock %}

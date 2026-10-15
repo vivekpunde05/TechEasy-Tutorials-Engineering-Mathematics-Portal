@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Manage Students - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px;">
+    <!-- Breadcrumb -->
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('admin.dashboard') }}" style="color:var(--text-muted); font-size:0.9rem;">← Back to Admin Dashboard</a>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px; margin-bottom: 30px;">
+        <div>
+            <h1 style="font-size: 2.2rem; margin-bottom: 6px;">Registered Students</h1>
+            <p style="color: var(--text-secondary); margin: 0;">Stream-isolated oversight of registered students enrolled in Diploma and Degree streams.</p>
+        </div>
+
+        <!-- Filter by Stream: Degree or Diploma -->
+        <div style="display: flex; gap: 8px; background: var(--bg-surface); padding: 6px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <a href="{{ url_for('admin.students', stream='Degree') }}" class="btn {{ 'btn-primary' if selected_stream == 'Degree' else 'btn-secondary' }} btn-sm" style="border:none;">
+                🎓 Degree Students ({{ degree_count }})
+            </a>
+            <a href="{{ url_for('admin.students', stream='Diploma') }}" class="btn {{ 'btn-primary' if selected_stream == 'Diploma' else 'btn-secondary' }} btn-sm" style="border:none;">
+                📜 Diploma Students ({{ diploma_count }})
+            </a>
+        </div>
+    </div>
+
+    {% if students %}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th># ID</th>
+                        <th>Student Name</th>
+                        <th>Email Address</th>
+                        <th>Mobile</th>
+                        <th>Manage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in students %}
+                        <tr>
+                            <td style="color: var(--text-muted);">#{{ s.id }}</td>
+                            <td><strong>{{ s.name }}</strong></td>
+                            <td>{{ s.email }}</td>
+                            <td>{{ s.mobile }}</td>
+                            <td>
+                                <form method="POST" onsubmit="return confirm('Remove student account {{ s.name }}?');" style="display:inline;">
+                                    <input type="hidden" name="action" value="delete_student">
+                                    <input type="hidden" name="user_id" value="{{ s.id }}">
+                                    <button type="submit" class="btn btn-danger btn-sm" style="padding:4px 10px;">✕ Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="card" style="text-align: center; padding: 60px 20px;">
+            <h3>No Students Found</h3>
+            <p style="color: var(--text-muted);">No students registered under the selected stream filter.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

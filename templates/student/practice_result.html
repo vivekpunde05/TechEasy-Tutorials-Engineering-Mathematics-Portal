@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% block title %}Practice Results - {{ subject.subject_name }} - TechEasy Tutorials{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px;">
+
+    <!-- ==================== SCORECARD HERO ==================== -->
+    <div class="card" style="padding: 40px 30px; text-align: center; margin-bottom: 40px; border-top: 5px solid {{ 'var(--success)' if percentage >= 50 else 'var(--danger)' }};">
+        <span class="badge badge-{{ 'diploma' if subject.course_type == 'Diploma' else 'degree' }}" style="margin-bottom: 12px;">
+            {{ subject.course_type }} • {{ subject.subject_name }}
+        </span>
+        <h1 style="font-size: 2.2rem; margin-bottom: 8px;">Practice Evaluation Complete!</h1>
+        <p style="color: var(--text-secondary); margin-bottom: 30px;">
+            Chapter: <strong>{{ chapter.chapter_name }}</strong>
+        </p>
+
+        <!-- Stats Counter -->
+        <div style="display: flex; justify-content: center; align-items: center; gap: 30px; flex-wrap: wrap; margin-bottom: 35px;">
+            <div style="text-align: center;">
+                <div style="font-size: 2.8rem; font-weight: 800; font-family: 'Outfit'; color: var(--primary);">
+                    {{ score }} / {{ total }}
+                </div>
+                <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Final Score</div>
+            </div>
+
+            <div style="width: 1px; height: 50px; background: var(--border-color);" class="hide-mobile"></div>
+
+            <div style="text-align: center;">
+                <div style="font-size: 2.8rem; font-weight: 800; font-family: 'Outfit'; color: {{ 'var(--success)' if percentage >= 60 else ('var(--warning)' if percentage >= 40 else 'var(--danger)') }};">
+                    {{ percentage }}%
+                </div>
+                <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Accuracy</div>
+            </div>
+
+            <div style="width: 1px; height: 50px; background: var(--border-color);" class="hide-mobile"></div>
+
+            <div style="display: flex; gap: 16px;">
+                <div style="padding: 10px 18px; background: var(--success-light); border-radius: var(--radius-md); text-align: center;">
+                    <div style="font-size: 1.4rem; font-weight: 800; color: var(--success);">{{ correct }}</div>
+                    <div style="font-size: 0.78rem; font-weight: 700; color: var(--success);">CORRECT</div>
+                </div>
+                <div style="padding: 10px 18px; background: var(--danger-light); border-radius: var(--radius-md); text-align: center;">
+                    <div style="font-size: 1.4rem; font-weight: 800; color: var(--danger);">{{ wrong }}</div>
+                    <div style="font-size: 0.78rem; font-weight: 700; color: var(--danger);">WRONG</div>
+                </div>
+                <div style="padding: 10px 18px; background: var(--bg-surface); border-radius: var(--radius-md); text-align: center;">
+                    <div style="font-size: 1.4rem; font-weight: 800; color: var(--text-muted);">{{ unattempted }}</div>
+                    <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted);">SKIPPED</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;">
+            <a href="{{ url_for('student.practice', subject_id=subject.id) }}" class="btn btn-primary">
+                Practice Another Chapter
+            </a>
+            <a href="{{ url_for('student.practice_results') }}" class="btn btn-secondary">
+                View Practice History
+            </a>
+            <a href="{{ url_for('student.index') }}" class="btn btn-outline">
+                Home
+            </a>
+        </div>
+    </div>
+
+    <!-- ==================== DETAILED REVIEW ==================== -->
+    <h2 style="font-size: 1.6rem; margin-bottom: 24px;">Question-by-Question Detailed Review</h2>
+
+    <div style="display: flex; flex-direction: column; gap: 24px; margin-bottom: 50px;">
+        {% for q in questions %}
+            {% set user_ans = user_answers.get(q.id, '') %}
+            {% set is_correct = (user_ans == q.correct_answer) %}
+            {% set is_skipped = (user_ans == '') %}
+
+            <div class="card" style="padding: 28px; border-left: 5px solid {{ 'var(--success)' if is_correct else ('var(--text-muted)' if is_skipped else 'var(--danger)') }};">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <div style="font-weight: 800; font-size: 1.1rem; color: var(--primary);">
+                        Question {{ loop.index }}
+                    </div>
+
+                    {% if is_correct %}
+                        <span class="badge" style="background:#dcfce7; color:#15803d;">✓ Correct (+1)</span>
+                    {% elif is_skipped %}
+                        <span class="badge" style="background:var(--bg-surface); color:var(--text-muted);">○ Unattempted (0)</span>
+                    {% else %}
+                        <span class="badge" style="background:#fee2e2; color:#b91c1c;">✗ Incorrect (0)</span>
+                    {% endif %}
+                </div>
+
+                <!-- Question Text -->
+                <div style="font-size: 1.15rem; font-weight: 500; margin-bottom: 20px;">
+                    {{ q.question | safe }}
+                </div>
+
+                {% if q.question_image %}
+                    <div style="margin-bottom: 18px;">
+                        <img src="/uploads/questions/{{ q.question_image }}" style="max-height: 180px; border-radius: 8px;">
+                    </div>
+                {% endif %}
+
+                <!-- Options Review -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-bottom: 20px;">
+                    {% for opt, text, img in [
+                        ('A', q.option_a, q.option_a_image),
+                        ('B', q.option_b, q.option_b_image),
+                        ('C', q.option_c, q.option_c_image),
+                        ('D', q.option_d, q.option_d_image)
+                    ] %}
+                        {% set is_this_correct = (opt == q.correct_answer) %}
+                        {% set is_this_chosen = (opt == user_ans) %}
+
+                        <div style="padding: 12px 16px; border-radius: var(--radius-md); border: 2px solid {{ 'var(--success)' if is_this_correct else ('var(--danger)' if is_this_chosen else 'var(--border-color)') }}; background: {{ 'rgba(16, 185, 129, 0.1)' if is_this_correct else ('rgba(239, 68, 68, 0.1)' if is_this_chosen else 'var(--bg-surface)') }}; display: flex; align-items: flex-start; gap: 10px;">
+                            <span style="font-weight: 800; font-size: 0.95rem;">({{ opt }})</span>
+                            <div style="flex-grow: 1;">
+                                <div>{{ text | safe }}</div>
+                                {% if is_this_correct %}
+                                    <div style="font-size: 0.8rem; font-weight: 700; color: var(--success); margin-top: 4px;">✓ Correct Answer</div>
+                                {% elif is_this_chosen %}
+                                    <div style="font-size: 0.8rem; font-weight: 700; color: var(--danger); margin-top: 4px;">✗ Your Choice</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Explanation Box -->
+                {% if q.explanation %}
+                    <div style="padding: 16px 20px; background: var(--bg-surface); border-radius: var(--radius-md); border-left: 4px solid var(--primary); font-size: 0.98rem; line-height: 1.6;">
+                        <strong style="color: var(--primary); display: block; margin-bottom: 6px;">💡 Step-by-Step Explanation:</strong>
+                        <div>{{ q.explanation | safe }}</div>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}
