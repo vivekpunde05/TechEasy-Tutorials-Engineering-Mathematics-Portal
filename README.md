@@ -136,7 +136,7 @@ source venv/bin/activate
 ### 2. Install Dependencies
 ```bash
 pip install -r requirements.txt
-```
+``
 
 ### 3. Configure Cloud Database (`.env`)
 Create a `.env` file in the project root (reference template in [`.env.example`](file:///c:/Users/vivek/OneDrive/Desktop/engineering_maths/.env.example)):
